@@ -105,6 +105,7 @@ struct ntdll_thread_data
     SYSTEM_SERVICE_TABLE     *syscall_table; /* 214/0370 syscall table */
     struct syscall_frame     *syscall_frame; /* 218/0378 current syscall frame */
     int                       syscall_trace; /* 21c/0380 syscall trace flag */
+    int                       esync_apc_fd;  /* fd to wait on for user APCs */
     int                       request_fd;    /* fd for sending server requests */
     int                       reply_fd;      /* fd for receiving server replies */
     int                       wait_fd[2];    /* fd for sleeping server requests */
