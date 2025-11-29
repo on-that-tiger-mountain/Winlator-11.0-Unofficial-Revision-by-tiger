@@ -300,7 +300,12 @@ DECL_HANDLER(suspend_process);
 DECL_HANDLER(resume_process);
 DECL_HANDLER(get_next_process);
 DECL_HANDLER(get_next_thread);
+DECL_HANDLER(create_esync);
+DECL_HANDLER(open_esync);
+DECL_HANDLER(get_esync_fd);
+DECL_HANDLER(esync_msgwait);
 DECL_HANDLER(set_keyboard_repeat);
+DECL_HANDLER(get_esync_apc_fd);
 
 typedef void (*req_handler)( const void *req, void *reply );
 static const req_handler req_handlers[REQ_NB_REQUESTS] =
@@ -598,7 +603,12 @@ static const req_handler req_handlers[REQ_NB_REQUESTS] =
     (req_handler)req_resume_process,
     (req_handler)req_get_next_process,
     (req_handler)req_get_next_thread,
+    (req_handler)req_create_esync,
+    (req_handler)req_open_esync,
+    (req_handler)req_get_esync_fd,
+    (req_handler)req_esync_msgwait,
     (req_handler)req_set_keyboard_repeat,
+    (req_handler)req_get_esync_apc_fd,
 };
 
 C_ASSERT( sizeof(abstime_t) == 8 );
@@ -2273,9 +2283,35 @@ C_ASSERT( offsetof(struct get_next_thread_request, flags) == 28 );
 C_ASSERT( sizeof(struct get_next_thread_request) == 32 );
 C_ASSERT( offsetof(struct get_next_thread_reply, handle) == 8 );
 C_ASSERT( sizeof(struct get_next_thread_reply) == 16 );
+C_ASSERT( offsetof(struct create_esync_request, access) == 12 );
+C_ASSERT( offsetof(struct create_esync_request, initval) == 16 );
+C_ASSERT( offsetof(struct create_esync_request, type) == 20 );
+C_ASSERT( offsetof(struct create_esync_request, max) == 24 );
+C_ASSERT( sizeof(struct create_esync_request) == 32 );
+C_ASSERT( offsetof(struct create_esync_reply, handle) == 8 );
+C_ASSERT( offsetof(struct create_esync_reply, type) == 12 );
+C_ASSERT( offsetof(struct create_esync_reply, shm_idx) == 16 );
+C_ASSERT( sizeof(struct create_esync_reply) == 24 );
+C_ASSERT( offsetof(struct open_esync_request, access) == 12 );
+C_ASSERT( offsetof(struct open_esync_request, attributes) == 16 );
+C_ASSERT( offsetof(struct open_esync_request, rootdir) == 20 );
+C_ASSERT( offsetof(struct open_esync_request, type) == 24 );
+C_ASSERT( sizeof(struct open_esync_request) == 32 );
+C_ASSERT( offsetof(struct open_esync_reply, handle) == 8 );
+C_ASSERT( offsetof(struct open_esync_reply, type) == 12 );
+C_ASSERT( offsetof(struct open_esync_reply, shm_idx) == 16 );
+C_ASSERT( sizeof(struct open_esync_reply) == 24 );
+C_ASSERT( offsetof(struct get_esync_fd_request, handle) == 12 );
+C_ASSERT( sizeof(struct get_esync_fd_request) == 16 );
+C_ASSERT( offsetof(struct get_esync_fd_reply, type) == 8 );
+C_ASSERT( offsetof(struct get_esync_fd_reply, shm_idx) == 12 );
+C_ASSERT( sizeof(struct get_esync_fd_reply) == 16 );
+C_ASSERT( offsetof(struct esync_msgwait_request, in_msgwait) == 12 );
+C_ASSERT( sizeof(struct esync_msgwait_request) == 16 );
 C_ASSERT( offsetof(struct set_keyboard_repeat_request, enable) == 12 );
 C_ASSERT( offsetof(struct set_keyboard_repeat_request, delay) == 16 );
 C_ASSERT( offsetof(struct set_keyboard_repeat_request, period) == 20 );
 C_ASSERT( sizeof(struct set_keyboard_repeat_request) == 24 );
 C_ASSERT( offsetof(struct set_keyboard_repeat_reply, enable) == 8 );
 C_ASSERT( sizeof(struct set_keyboard_repeat_reply) == 16 );
+C_ASSERT( sizeof(struct get_esync_apc_fd_request) == 16 );
