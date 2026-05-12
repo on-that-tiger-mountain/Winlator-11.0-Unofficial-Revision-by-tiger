@@ -26,39 +26,46 @@ jobs:
           git clone \
           --recursive \
           --single-branch \
-          --branch winlator_bionic \
-          https://github.com/Pipetto-crypto/winlator
+          --branch winlator-tiger \
+          https://github.com/on-that-tiger-mountain/winlator-app
 
       - name: Checkout build repository
         uses: actions/checkout@v6
         with:
           path: build
 
-      - name: Remove sharedUserId
-        run: |
-          cd winlator/app/src/main
-          sed -i 's/android:sharedUserId="com.termux"//' AndroidManifest.xml
-          
-      - name: Setup JDK
-        uses: actions/setup-java@v5
+#      - name: Remove sharedUserId
+#        run: |
+#          cd winlator/app/src/main
+#          sed -i 's/android:sharedUserId="com.termux"//' AndroidManifest.xml
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
         with:
-          distribution: 'temurin'
           java-version: '17'
-          cache: 'gradle'
+          distribution: 'temurin'
 
-      - name: Set gradlew permissions
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+        with:
+          packages: 'cmake;3.22.1'
+
+      - name: Fix ALL duplicate native libs
         run: |
-          cd winlator
+          find . -name "build.gradle" -exec sed -i '/android {/a \    packagingOptions { jniLibs { pickFirsts += ["lib/arm64-v8a/*.so"] } }' {} +
+          echo "Fixed all .so duplicate issues"
+
+      - name: Build APK
+        run: |
+          GRADLEW_PATH=$(find . -name gradlew | head -n 1)
+          PROJECT_ROOT=$(dirname "$GRADLEW_PATH")
+          cd "$PROJECT_ROOT"
           chmod +x gradlew
-
-      - name: Build with Gradle
-        run: |
-          cd winlator
-          ./gradlew assembleDebug
+          ./gradlew assembleDebug --stacktrace
 
       - name: Get current source commit SHA and changelog
         run: |
-          cd winlator
+          cd winlator-app
           if [ -f ../build/commit_sha.txt ]; then
             echo "$(git log --pretty=format:%s $(cat ../build/commit_sha.txt)..HEAD)" > CHANGELOG.txt
             git rev-parse HEAD > ../build/commit_sha.txt
@@ -79,7 +86,7 @@ jobs:
       - name: Release
         uses: softprops/action-gh-release@v2
         with:
-          body_path: winlator/CHANGELOG.txt
-          files: winlator/app/build/outputs/apk/debug/app-debug.apk
-          name: winlator-bionic-${{ env.DATE }}
+          body_path: winlator-app/CHANGELOG.txt
+          files: winlator-app/app/build/outputs/apk/debug/app-debug.apk
+          name: winlator-tiger-${{ env.DATE }}
           tag_name: ${{ env.DATE }}
